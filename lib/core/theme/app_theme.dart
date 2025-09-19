@@ -5,23 +5,16 @@ class AppTheme {
     iconTheme: IconThemeData(color: Colors.grey, size: 20),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        shadowColor: Colors.red,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-        textStyle: TextStyle(
-          color: Colors.black,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+        textStyle: const TextStyle(fontSize: 20),
       ),
     ),
     primarySwatch: Colors.cyan,
     scaffoldBackgroundColor: Colors.white,
     appBarTheme: const AppBarTheme(
+      actionsIconTheme: IconThemeData(color: Colors.black54),
       toolbarHeight: 100,
-      backgroundColor: Colors.cyan,
+      backgroundColor: Colors.transparent,
       elevation: 0,
       centerTitle: true,
       titleTextStyle: TextStyle(
@@ -40,22 +33,14 @@ class AppTheme {
     iconTheme: IconThemeData(color: Colors.grey, size: 20),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        shadowColor: Colors.blue,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        textStyle: TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+        textStyle: const TextStyle(fontSize: 20),
       ),
     ),
     primarySwatch: Colors.blue,
     scaffoldBackgroundColor: Colors.black,
     appBarTheme: AppBarTheme(
-      backgroundColor: Colors.grey[850],
+      backgroundColor: Colors.transparent,
       elevation: 0,
       toolbarHeight: 100,
       centerTitle: true,

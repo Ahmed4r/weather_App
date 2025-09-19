@@ -1,4 +1,8 @@
+import 'dart:ui';
+
+import 'package:day_night_themed_switcher/day_night_themed_switcher.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import 'package:weather_app/features/presentation/settings/theme_cubit.dart';
@@ -13,6 +17,7 @@ class WeatherScreen extends StatefulWidget {
 }
 
 class _WeatherScreenState extends State<WeatherScreen> {
+  final TextEditingController _searchController = TextEditingController();
   bool showSearch = false;
   void toggleShowSearch() {
     setState(() {
@@ -21,22 +26,36 @@ class _WeatherScreenState extends State<WeatherScreen> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDarkMode = context.watch<ThemeCubit>().isDarkMode;
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: showSearch ? 200 : 50,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: isDarkMode
+              ? Brightness.light
+              : Brightness.dark,
+        ),
+        backgroundColor: Colors.transparent,
+        toolbarHeight: showSearch ? 50 : 50,
         leadingWidth: 300,
         title: showSearch
             ? TextField(
+                controller: _searchController,
                 decoration: InputDecoration(
                   hintText: 'Search city',
                   hintStyle: TextStyle(
                     color: isDarkMode ? Colors.white70 : Colors.black54,
                   ),
-
+                  contentPadding: EdgeInsets.symmetric(horizontal: 20),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   filled: true,
                   fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
@@ -54,13 +73,13 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: Icon(isDarkMode ? Icons.wb_sunny : Icons.nightlight_round),
-            onPressed: () {
-              context.read<ThemeCubit>().toggleTheme(
-                isDarkMode ? ThemeMode.light : ThemeMode.dark,
-              );
-            },
+          DayNightSwitch(
+            // duration: Duration(milliseconds: 800),
+            // initiallyDark: true,
+            size: 20,
+            onChange: (dark) => context.read<ThemeCubit>().toggleTheme(
+              dark ? ThemeMode.dark : ThemeMode.light,
+            ),
           ),
           IconButton(
             onPressed: () {
@@ -70,38 +89,87 @@ class _WeatherScreenState extends State<WeatherScreen> {
           ),
         ],
       ),
-      body: BlocBuilder<WeatherCubit, WeatherState>(
-        builder: (context, state) {
-          if (state is WeatherInitial) {
-            return Center(
-              child: ElevatedButton(
-                onPressed: () => context.read<WeatherCubit>().getLongLat(),
-                child: const Text('Get Weather'),
+      body: Stack(
+        children: [
+          Align(
+            alignment: AlignmentDirectional(3, -0.3),
+            child: Container(
+              height: 300,
+              width: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.deepPurple,
               ),
-            );
-          }
-          if (state is WeatherLoading) {
-            return Center(child: Lottie.asset('assets/Loading.json'));
-          }
-          if (state is WeatherError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(state.errorMessage, style: TextStyle(color: Colors.red)),
-                  ElevatedButton(
-                    onPressed: () => context.read<WeatherCubit>().getLongLat(),
-                    child: Text('Retry'),
-                  ),
-                ],
+            ),
+          ),
+          Align(
+            alignment: AlignmentDirectional(-3, -0.3),
+            child: Container(
+              height: 300,
+              width: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.deepPurple,
               ),
-            );
-          }
-          if (state is WeatherSuccess) {
-            return buildWeatherData(context, state, isDarkMode);
-          }
-          return Center(child: Text('Something went wrong'));
-        },
+            ),
+          ),
+          Align(
+            alignment: AlignmentDirectional(0, -1.2),
+            child: Container(
+              height: 300,
+              width: 600,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.orange,
+              ),
+            ),
+          ),
+          BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 100, sigmaY: 100),
+            child: Container(color: Colors.transparent),
+          ),
+          if (!showSearch)
+            Positioned.fill(
+              child: BlocBuilder<WeatherCubit, WeatherState>(
+                builder: (context, state) {
+                  if (state is WeatherInitial) {
+                    return Center(
+                      child: ElevatedButton(
+                        onPressed: () =>
+                            context.read<WeatherCubit>().getLongLat(),
+                        child: const Text('Get Weather'),
+                      ),
+                    );
+                  }
+                  if (state is WeatherLoading) {
+                    return Center(child: Lottie.asset('assets/Loading.json'));
+                  }
+                  if (state is WeatherError) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            state.errorMessage,
+                            style: TextStyle(color: Colors.red),
+                          ),
+                          ElevatedButton(
+                            onPressed: () =>
+                                context.read<WeatherCubit>().getLongLat(),
+                            child: Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  if (state is WeatherSuccess) {
+                    return buildWeatherData(context, state, isDarkMode);
+                  }
+                  return Center(child: Text('Something went wrong'));
+                },
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -118,8 +186,6 @@ Widget buildWeatherData(BuildContext context, state, isDarkMode) {
 
         child: Column(
           children: [
-            const Icon(Icons.location_on, size: 50),
-            SizedBox(height: 20),
             const Text('My Location', style: TextStyle(fontSize: 20)),
             SizedBox(height: 10),
             // country- city

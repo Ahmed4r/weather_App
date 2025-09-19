@@ -46,6 +46,7 @@ dependencies:
   awesome_dialog: ^3.2.1
   shared_preferences: ^2.5.3
   flutter_dotenv: ^5.1.0
+  day_night_themed_switcher: ^2.0.2
 
 dev_dependencies:
   flutter_test:
