@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:weather_app/core/theme/app_theme.dart';
 import 'package:weather_app/features/presentation/settings/theme_cubit.dart';
 import 'package:weather_app/features/presentation/weather/weather_cubit.dart';
@@ -9,6 +10,10 @@ import 'package:weather_app/features/presentation/weather/weather_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
+
   FlutterError.onError = (FlutterErrorDetails details) {
     ErrorHandler.handleFlutterError(details);
   };
