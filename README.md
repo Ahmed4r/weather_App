@@ -1,16 +1,44 @@
-# weather_app
+# Weather App 🌤️
 
-A new Flutter project.
+A Flutter practice project focused on mastering **Cubit state management** and **API integration**.
 
-## Getting Started
+## 🎯 Purpose
 
-This project is a starting point for a Flutter application.
+Built to practice and learn:
 
-A few resources to get you started if this is your first Flutter project:
+- **Cubit/Bloc State Management** - Reactive UI with proper state transitions
+- **REST API Integration** - Weather data with error handling
+- **Location Services** - GPS integration
+- **Theme Management** - Dark/Light mode with persistence
+- **Clean Architecture** - Separation of concerns
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## 📱 Features
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Real-time weather data from OpenWeatherMap API
+- Location-based weather fetching
+- City search functionality
+- Dark/Light theme toggle with persistence
+- Pull-to-refresh and error handling
+
+## 🛠️ Tech Stack
+
+- **Flutter** - Cross-platform framework
+- **Cubit** - State management
+- **HTTP** - API integration
+- **Geolocator** - Location services
+- **SharedPreferences** - Local storage
+- **Lottie** - Animations
+
+
+## 📚 Skills Demonstrated
+
+✅ Flutter development with modern practices  
+✅ State management using Cubit pattern  
+✅ API integration with error handling  
+✅ Location services and permissions  
+✅ Persistent storage and theming  
+✅ Clean code architecture
+
+---
+
+_Practice project for Flutter & Cubit mastery_ 🚀
