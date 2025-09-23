@@ -20,6 +20,14 @@ Built to practice and learn:
 - Dark/Light theme toggle with persistence
 - Pull-to-refresh and error handling
 
+## screenshots
+<table>
+    <tr>
+        <td><img src="screenshots/dark.jpeg" alt="Light Mode" width="500"/></td>
+        <td><img src="screenshots/light.jpeg" alt="Dark Mode" width="500"/></td>
+    </tr>
+</table>
+
 ## 🛠️ Tech Stack
 
 - **Flutter** - Cross-platform framework
