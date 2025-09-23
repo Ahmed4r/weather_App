@@ -23,8 +23,8 @@ Built to practice and learn:
 ## screenshots
 <table>
     <tr>
-        <td><img src="screenshots/dark.jpeg" alt="Light Mode" width="500"/></td>
-        <td><img src="screenshots/light.jpeg" alt="Dark Mode" width="500"/></td>
+        <td><img src="screenshots/dark.jpeg" alt="Light Mode" width="300"/></td>
+        <td><img src="screenshots/light.jpeg" alt="Dark Mode" width="300"/></td>
     </tr>
 </table>
 
