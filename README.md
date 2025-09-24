@@ -15,6 +15,7 @@ Built to practice and learn:
 ## 📱 Features
 
 - Real-time weather data from OpenWeatherMap API
+- get weather forecast for 4 days
 - Location-based weather fetching
 - City search functionality
 - Dark/Light theme toggle with persistence
@@ -51,7 +52,6 @@ Built to practice and learn:
 ✅ API integration with error handling  
 ✅ Location services and permissions  
 ✅ Persistent storage and theming  
-✅ Clean code architecture
 
 ---
 
