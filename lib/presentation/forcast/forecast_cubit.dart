@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
+
 import 'package:weather_app/presentation/forcast/forcaset_state.dart';
 import 'package:weather_app/shared/api_service.dart';
 import 'package:weather_app/shared/geo_locator_service.dart';
@@ -52,10 +53,12 @@ class ForecastCubit extends Cubit<ForecastState> {
         long,
       ); // Fixed: lat first, then long
 
-      // Get city name from first forecast item if available
-      String cityName = data.isNotEmpty
-          ? (data.first.name ?? 'Unknown')
-          : 'Unknown';
+      // Debug: Log the received forecast data
+      log('Forecast data received: $data');
+
+      // Extract city name from ForecastModel
+      String cityName = data.city?.name ?? 'Unknown Location';
+      log('Extracted city name: $cityName');
 
       emit(ForecastSuccess(cityName, data));
     } catch (e) {

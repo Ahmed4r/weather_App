@@ -54,7 +54,7 @@ class ApiService {
   }
 
   // get 4 day forecast
-  Future<List<weather_model.Weather>> get4DayForecast(
+  Future<forecast_model.ForecastModel> get4DayForecast(
     double lat,
     double long,
   ) async {
@@ -72,70 +72,14 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        List<weather_model.Weather> forecast = [];
+        forecast_model.ForecastModel forecast =
+            forecast_model.ForecastModel.fromJson(data);
         String cityName = '';
 
         // Log city info for debugging
         if (data['city'] != null) {
           cityName = data['city']['name'] ?? '';
           log('City info: $cityName');
-        }
-
-        // Check if 'list' exists in the response
-        if (data['list'] != null) {
-          log('Found ${data['list'].length} forecast items');
-          for (var item in data['list']) {
-            // Create Weather object from forecast list item
-            final forecastItem = forecast_model.ForecastList.fromJson(item);
-
-            // Convert forecast item to Weather model for compatibility
-            forecast.add(
-              weather_model.Weather(
-                coord: null, // Not available in forecast items
-                weather: forecastItem.weather
-                    ?.map(
-                      (w) => weather_model.WeatherModel(
-                        id: w.id?.toInt(),
-                        main: w.main,
-                        description: w.description,
-                        icon: w.icon,
-                      ),
-                    )
-                    .toList(),
-                main: forecastItem.main != null
-                    ? weather_model.Main(
-                        temp: forecastItem.main!.temp?.toDouble(),
-                        feelsLike: forecastItem.main!.feelsLike?.toDouble(),
-                        tempMin: forecastItem.main!.tempMin?.toDouble(),
-                        tempMax: forecastItem.main!.tempMax?.toDouble(),
-                        pressure: forecastItem.main!.pressure?.toInt(),
-                        humidity: forecastItem.main!.humidity?.toInt(),
-                      )
-                    : null,
-                wind: forecastItem.wind != null
-                    ? weather_model.Wind(
-                        speed: forecastItem.wind!.speed?.toDouble(),
-                        deg: forecastItem.wind!.deg?.toInt(),
-                      )
-                    : null,
-                clouds: forecastItem.clouds != null
-                    ? weather_model.Clouds(
-                        all: forecastItem.clouds!.all?.toInt(),
-                      )
-                    : null,
-                sys: null, // Not available in forecast items
-                base: null,
-                visibility: forecastItem.visibility?.toInt(),
-                dt: forecastItem.dt?.toInt(),
-                timezone: null,
-                id: null,
-                name: cityName, // Add city name here
-                cod: null,
-              ),
-            );
-          }
-        } else {
-          log('No forecast list found in response');
         }
 
         return forecast;

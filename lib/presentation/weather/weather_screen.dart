@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
+import 'package:weather_app/presentation/forcast/forcast_screen.dart';
 import 'package:weather_app/presentation/settings/theme_cubit.dart';
 import 'package:weather_app/presentation/weather/weather_cubit.dart';
 
@@ -93,7 +94,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
           // get forcast for 4 days
           IconButton(
             onPressed: () {
-              Navigator.pushNamed(context, '/forecast');
+              Navigator.pushNamed(context, ForecastScreen.routeName);
             },
             icon: Icon(Icons.calendar_today),
           ),
@@ -186,114 +187,112 @@ class _WeatherScreenState extends State<WeatherScreen> {
 }
 
 Widget buildWeatherData(BuildContext context, state, isDarkMode) {
-  return Center(
-    child: RefreshIndicator(
-      onRefresh: () async {
-        await context.read<WeatherCubit>().getWeather();
-      },
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
+  return RefreshIndicator(
+    onRefresh: () async {
+      await context.read<WeatherCubit>().getWeather();
+    },
+    child: SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
 
-        child: Column(
-          children: [
-            const Text('My Location', style: TextStyle(fontSize: 20)),
-            SizedBox(height: 10),
-            // country- city
-            Text(
-              '${state.weather.sys?.country ?? ''} - ${state.weather.name ?? ''}',
-              style: TextStyle(
-                fontSize: 30,
-                color: isDarkMode ? Colors.white : Colors.black,
-              ),
+      child: Column(
+        children: [
+          const Text('My Location', style: TextStyle(fontSize: 20)),
+          SizedBox(height: 10),
+          // country- city
+          Text(
+            '${state.weather.sys?.country ?? ''} - ${state.weather.name ?? ''}',
+            style: TextStyle(
+              fontSize: 30,
+              color: isDarkMode ? Colors.white : Colors.black,
             ),
+          ),
 
-            Text(
-              state.formattedTime,
-              style: TextStyle(
-                fontSize: 30,
-                color: isDarkMode ? Colors.white : Colors.black,
-              ),
+          Text(
+            state.formattedTime,
+            style: TextStyle(
+              fontSize: 30,
+              color: isDarkMode ? Colors.white : Colors.black,
             ),
+          ),
 
-            // weather state image
-            Lottie.asset(
-              context.read<WeatherCubit>().getWeatherImage(
-                state.weather.weather?[0].main,
-              ),
+          // weather state image
+          Lottie.asset(
+            context.read<WeatherCubit>().getWeatherImage(
+              state.weather.weather?[0].main,
             ),
-            SizedBox(height: 20),
-            // temperature
-            Text(
-              state.weather.main?.temp != null
-                  ? '${state.weather.main!.temp!.toStringAsFixed(1)} °C'
-                  : 'Loading...',
-              // model.main?.temp != null
-              //     ? '${model.main!.temp!.toStringAsFixed(1)} °C'
-              //     : 'Loading...',
-              style: TextStyle(
-                fontSize: 70,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white : Colors.black,
-              ),
+          ),
+          SizedBox(height: 20),
+          // temperature
+          Text(
+            state.weather.main?.temp != null
+                ? '${state.weather.main!.temp!.toStringAsFixed(1)} °C'
+                : 'Loading...',
+            // model.main?.temp != null
+            //     ? '${model.main!.temp!.toStringAsFixed(1)} °C'
+            //     : 'Loading...',
+            style: TextStyle(
+              fontSize: 70,
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white : Colors.black,
             ),
-            SizedBox(height: 5),
-            Text(
-              'Feels like ${state.weather.main?.feelsLike != null ? state.weather.main!.feelsLike!.toStringAsFixed(1) : 'Loading...'} °C',
-              style: TextStyle(fontSize: 20),
-            ),
-            SizedBox(height: 20),
-            // weather status
-            IntrinsicHeight(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    state.weather.weather?[0].main ?? 'Loading...',
-                    style: const TextStyle(fontSize: 25),
-                  ),
-                  VerticalDivider(
-                    color: Colors.amberAccent,
-                    thickness: 2,
-                    width: 30,
-                  ),
-                  Text(
-                    state.weather.weather?[0].description ?? 'Loading...',
-                    style: const TextStyle(fontSize: 25),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 10),
-            //   min/max temp
-            Wrap(
-              alignment: WrapAlignment.center,
-              crossAxisAlignment: WrapCrossAlignment.end,
-              spacing: 10,
+          ),
+          SizedBox(height: 5),
+          Text(
+            'Feels like ${state.weather.main?.feelsLike != null ? state.weather.main!.feelsLike!.toStringAsFixed(1) : 'Loading...'} °C',
+            style: TextStyle(fontSize: 20),
+          ),
+          SizedBox(height: 90),
+          // weather status
+          IntrinsicHeight(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Humidity
                 Text(
-                  'Humidity: ${state.weather.main?.humidity?.toString() ?? 'Loading...'} %',
-                  style: const TextStyle(fontSize: 20),
+                  state.weather.weather?[0].main ?? 'Loading...',
+                  style: const TextStyle(fontSize: 25),
                 ),
-
-                Text(
-                  'Pressure: ${state.weather.main?.pressure?.toString() ?? 'Loading...'} hPa',
-                  style: const TextStyle(fontSize: 20),
-                ),
-
-                Text(
-                  'Min Temp: ${state.weather.main?.tempMin != null ? state.weather.main!.tempMin!.toStringAsFixed(1) : 'Loading...'} °C',
-                  style: const TextStyle(fontSize: 20),
+                VerticalDivider(
+                  color: Colors.amberAccent,
+                  thickness: 2,
+                  width: 30,
                 ),
                 Text(
-                  'Max Temp: ${state.weather.main?.tempMax != null ? state.weather.main!.tempMax!.toStringAsFixed(1) : 'Loading...'} °C',
-                  style: const TextStyle(fontSize: 20),
+                  state.weather.weather?[0].description ?? 'Loading...',
+                  style: const TextStyle(fontSize: 25),
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+          SizedBox(height: 10),
+          //   min/max temp
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.end,
+            spacing: 10,
+            children: [
+              // Humidity
+              Text(
+                'Humidity: ${state.weather.main?.humidity?.toString() ?? 'Loading...'} %',
+                style: const TextStyle(fontSize: 20),
+              ),
+
+              Text(
+                'Pressure: ${state.weather.main?.pressure?.toString() ?? 'Loading...'} hPa',
+                style: const TextStyle(fontSize: 20),
+              ),
+
+              Text(
+                'Min Temp: ${state.weather.main?.tempMin != null ? state.weather.main!.tempMin!.toStringAsFixed(1) : 'Loading...'} °C',
+                style: const TextStyle(fontSize: 20),
+              ),
+              Text(
+                'Max Temp: ${state.weather.main?.tempMax != null ? state.weather.main!.tempMax!.toStringAsFixed(1) : 'Loading...'} °C',
+                style: const TextStyle(fontSize: 20),
+              ),
+            ],
+          ),
+        ],
       ),
     ),
   );

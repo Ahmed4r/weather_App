@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:weather_app/model/weather_model.dart';
+import 'package:weather_app/model/forecast_model.dart';
 
 class ForecastState extends Equatable {
   @override
@@ -12,7 +12,7 @@ class ForecastLoading extends ForecastState {}
 
 class ForecastSuccess extends ForecastState {
   final String cityName;
-  final List<Weather> forecast;
+  final ForecastModel forecast;
   ForecastSuccess(this.cityName, this.forecast);
   @override
   List<Object?> get props => [cityName, forecast];

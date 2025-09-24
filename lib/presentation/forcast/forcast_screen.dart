@@ -1,16 +1,40 @@
+import 'package:day_night_themed_switcher/day_night_themed_switcher.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:weather_app/model/forecast_model.dart';
 import 'package:weather_app/presentation/forcast/forcaset_state.dart';
 import 'package:weather_app/presentation/forcast/forecast_cubit.dart';
-import 'package:weather_app/model/weather_model.dart';
 
-class ForecastScreen extends StatelessWidget {
+import 'package:weather_app/presentation/settings/theme_cubit.dart';
+
+class ForecastScreen extends StatefulWidget {
   static const String routeName = '/forecast';
   const ForecastScreen({super.key});
 
   @override
+  State<ForecastScreen> createState() => _ForecastScreenState();
+}
+
+class _ForecastScreenState extends State<ForecastScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  bool showSearch = false;
+  void toggleShowSearch() {
+    setState(() {
+      showSearch = !showSearch;
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isDarkMode = context.watch<ThemeCubit>().isDarkMode;
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
@@ -26,66 +50,94 @@ class ForecastScreen extends StatelessWidget {
             final forecastData = state.forecast;
 
             // Group forecast data by day (since API returns 3-hour intervals)
-            final dailyForecasts = _groupForecastsByDay(forecastData);
 
-            return Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.blue.shade300.withOpacity(0.3),
-                    Colors.blue.shade100.withOpacity(0.1),
-                  ],
+            return Scaffold(
+              body: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.blue.shade300.withOpacity(0.3),
+                      Colors.blue.shade100.withOpacity(0.1),
+                    ],
+                  ),
                 ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    // Header with current location info
-                    SizedBox(height: 100),
-                    if (forecastData.isNotEmpty &&
-                        forecastData.first.name != null)
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.location_on, color: Colors.blue),
-                            const SizedBox(width: 8),
-                            Text(
-                              forecastData.first.name ?? 'Unknown Location',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      // Header with current location info
+                      SizedBox(height: 60),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              toggleShowSearch();
+                            },
+                            icon: Icon(Icons.search),
+                          ),
+                          DayNightSwitch(
+                            duration: Duration(milliseconds: 800),
+                            // Initiallyl listen to theme changes
+                            initiallyDark: isDarkMode,
+                            size: 20,
+                            onChange: (dark) =>
+                                context.read<ThemeCubit>().toggleTheme(
+                                  dark ? ThemeMode.dark : ThemeMode.light,
+                                ),
+                          ),
+
+                          // get forcast for 4 days
+                        ],
+                      ),
+                      if (forecastData.list != null &&
+                          forecastData.list!.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.location_on, color: Colors.blue),
+                              const SizedBox(width: 8),
+                              Text(
+                                forecastData.city?.name != null
+                                    ? forecastData.city!.name!
+                                    : 'Unknown Location',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                        ),
+
+                      const SizedBox(height: 20),
+
+                      // Forecast list
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: _getDailyForecasts(
+                            forecastData.list!,
+                          ).length,
+                          itemBuilder: (context, index) {
+                            final dayData = _getDailyForecasts(
+                              forecastData.list!,
+                            )[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12.0),
+                              child: _buildForecastCard(dayData),
+                            );
+                          },
                         ),
                       ),
-
-                    const SizedBox(height: 20),
-                 
-
-                    // Forecast list
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: dailyForecasts.length,
-                        itemBuilder: (context, index) {
-                          final dayData = dailyForecasts[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 12.0),
-                            child: _buildForecastCard(dayData),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );
@@ -154,56 +206,40 @@ class ForecastScreen extends StatelessWidget {
     );
   }
 
-  // Group forecast data by day
-  List<DayForecast> _groupForecastsByDay(List<Weather> forecasts) {
-    final Map<String, List<Weather>> groupedData = {};
+  List<ForecastList> _getDailyForecasts(List<ForecastList> forecasts) {
+    Map<String, ForecastList> dailyForecasts = {};
 
-    for (final forecast in forecasts) {
+    for (var forecast in forecasts) {
       if (forecast.dt != null) {
-        final date = DateTime.fromMillisecondsSinceEpoch(forecast.dt! * 1000);
+        final date = DateTime.fromMillisecondsSinceEpoch(
+          (forecast.dt! * 1000).toInt(),
+        );
         final dateKey = DateFormat('yyyy-MM-dd').format(date);
 
-        if (!groupedData.containsKey(dateKey)) {
-          groupedData[dateKey] = [];
+        // Prefer forecasts around noon (12:00 PM) for better daily representation
+        if (!dailyForecasts.containsKey(dateKey)) {
+          dailyForecasts[dateKey] = forecast;
+        } else {
+          // If we already have a forecast for this day, check if current one is closer to noon
+          final currentTime = date.hour;
+          final existingTime = DateTime.fromMillisecondsSinceEpoch(
+            (dailyForecasts[dateKey]!.dt! * 1000).toInt(),
+          ).hour;
+
+          // If current forecast is closer to 12 PM, use it instead
+          if ((currentTime - 12).abs() < (existingTime - 12).abs()) {
+            dailyForecasts[dateKey] = forecast;
+          }
         }
-        groupedData[dateKey]!.add(forecast);
       }
     }
 
-    return groupedData.entries.map((entry) {
-      final dayForecasts = entry.value;
-      // Use the midday forecast as representative, or first available
-      final mainForecast = dayForecasts.firstWhere((f) {
-        final hour = DateTime.fromMillisecondsSinceEpoch(f.dt! * 1000).hour;
-        return hour >= 12 && hour <= 15; // Around noon
-      }, orElse: () => dayForecasts.first);
-
-      // Calculate min/max temps for the day
-      final temps = dayForecasts
-          .map((f) => f.main?.temp ?? 0.0)
-          .where((temp) => temp > 0)
-          .toList();
-
-      final minTemp = temps.isNotEmpty
-          ? temps.reduce((a, b) => a < b ? a : b)
-          : 0.0;
-      final maxTemp = temps.isNotEmpty
-          ? temps.reduce((a, b) => a > b ? a : b)
-          : 0.0;
-
-      return DayForecast(
-        date: DateTime.fromMillisecondsSinceEpoch(mainForecast.dt! * 1000),
-        weather: mainForecast,
-        minTemp: minTemp,
-        maxTemp: maxTemp,
-      );
-    }).toList();
+    return dailyForecasts.values.toList();
   }
 
-  Widget _buildForecastCard(DayForecast dayData) {
-    final weather = dayData.weather;
-    final weatherInfo = weather.weather?.isNotEmpty == true
-        ? weather.weather!.first
+  Widget _buildForecastCard(ForecastList weatherData) {
+    final weatherInfo = weatherData.weather?.isNotEmpty == true
+        ? weatherData.weather!.first
         : null;
 
     return Container(
@@ -227,7 +263,13 @@ class ForecastScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  DateFormat('EEE').format(dayData.date),
+                  DateFormat('EEE').format(
+                    weatherData.dt != null
+                        ? DateTime.fromMillisecondsSinceEpoch(
+                            (weatherData.dt! * 1000).toInt(),
+                          )
+                        : DateTime.now(),
+                  ),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -235,7 +277,13 @@ class ForecastScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  DateFormat('MMM dd').format(dayData.date),
+                  DateFormat('MMM dd').format(
+                    weatherData.dt != null
+                        ? DateTime.fromMillisecondsSinceEpoch(
+                            (weatherData.dt! * 1000).toInt(),
+                          )
+                        : DateTime.now(),
+                  ),
                   style: TextStyle(fontSize: 14),
                 ),
               ],
@@ -248,9 +296,11 @@ class ForecastScreen extends StatelessWidget {
             child: Column(
               children: [
                 Icon(
-                  _getWeatherIcon(weatherInfo?.main ?? ''),
+                  _getWeatherIcon(weatherInfo?.main.toString() ?? ''),
                   size: 32,
-                  color: _getWeatherIconColor(weatherInfo?.main ?? ''),
+                  color: _getWeatherIconColor(
+                    weatherInfo?.main.toString() ?? '',
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -272,14 +322,14 @@ class ForecastScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '${dayData.maxTemp.round()}°',
+                  '${weatherData.main?.tempMax?.round() ?? 0}°',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
-                  '${dayData.minTemp.round()}°',
+                  '${weatherData.main?.tempMin?.round() ?? 0}°',
                   style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
               ],
@@ -292,26 +342,26 @@ class ForecastScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                if (weather.main?.humidity != null)
+                if (weatherData.main?.humidity != null)
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.water_drop, size: 16, color: Colors.blue[300]),
                       const SizedBox(width: 4),
                       Text(
-                        '${weather.main!.humidity}%',
+                        '${weatherData.main!.humidity}%',
                         style: const TextStyle(fontSize: 12),
                       ),
                     ],
                   ),
-                if (weather.wind?.speed != null)
+                if (weatherData.wind?.speed != null)
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.air, size: 16, color: Colors.grey[600]),
                       const SizedBox(width: 4),
                       Text(
-                        '${weather.wind!.speed?.round()}m/s',
+                        '${weatherData.wind!.speed?.round()}m/s',
                         style: const TextStyle(fontSize: 12),
                       ),
                     ],
@@ -366,19 +416,4 @@ class ForecastScreen extends StatelessWidget {
         return Colors.grey;
     }
   }
-}
-
-// Helper class to group daily forecast data
-class DayForecast {
-  final DateTime date;
-  final Weather weather;
-  final double minTemp;
-  final double maxTemp;
-
-  DayForecast({
-    required this.date,
-    required this.weather,
-    required this.minTemp,
-    required this.maxTemp,
-  });
 }
