@@ -92,4 +92,39 @@ class ApiService {
       throw Exception('Failed to load weather data: $e');
     }
   }
+
+  // get forecast by city name
+  Future<forecast_model.ForecastModel> searchCityForecast4Days(
+    String city,
+  ) async {
+    try {
+      final url = Uri.parse(
+        '${Constants.forecastUrl}?q=$city&appid=${Constants.apiKey}&units=metric',
+      );
+      final response = await http.get(url).timeout(const Duration(seconds: 10));
+
+      log('Forecast API Status Code: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        forecast_model.ForecastModel forecast =
+            forecast_model.ForecastModel.fromJson(data);
+        String cityName = '';
+
+        // Log city info for debugging
+        if (data['city'] != null) {
+          cityName = data['city']['name'] ?? '';
+          log('City info: $cityName');
+        }
+
+        return forecast;
+      } else {
+        throw Exception(
+          'Failed to load weather data: ${response.reasonPhrase}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Failed to load weather data: $e');
+    }
+  }
 }

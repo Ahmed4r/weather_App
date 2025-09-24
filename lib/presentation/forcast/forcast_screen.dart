@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:day_night_themed_switcher/day_night_themed_switcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,9 +22,13 @@ class _ForecastScreenState extends State<ForecastScreen> {
   final TextEditingController _searchController = TextEditingController();
   bool showSearch = false;
   void toggleShowSearch() {
+    HapticFeedback.lightImpact();
     setState(() {
       showSearch = !showSearch;
     });
+    if (!showSearch) {
+      _searchController.clear();
+    }
   }
 
   @override
@@ -41,16 +46,25 @@ class _ForecastScreenState extends State<ForecastScreen> {
       body: BlocBuilder<ForecastCubit, ForecastState>(
         builder: (context, state) {
           if (state is ForecastLoading) {
-            return const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+            return Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.blue.shade300.withOpacity(0.3),
+                    Colors.blue.shade100.withOpacity(0.1),
+                  ],
+                ),
+              ),
+              child: const Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                ),
               ),
             );
           } else if (state is ForecastSuccess) {
             final forecastData = state.forecast;
-
-            // Group forecast data by day (since API returns 3-hour intervals)
-
             return Scaffold(
               body: Container(
                 decoration: BoxDecoration(
@@ -72,12 +86,58 @@ class _ForecastScreenState extends State<ForecastScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          IconButton(
-                            onPressed: () {
-                              toggleShowSearch();
-                            },
-                            icon: Icon(Icons.search),
+                          Container(
+                            margin: const EdgeInsets.only(right: 8),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: showSearch
+                                    ? [
+                                        Colors.orange.shade400,
+                                        Colors.orange.shade600,
+                                      ]
+                                    : [
+                                        Colors.blue.shade400,
+                                        Colors.blue.shade600,
+                                      ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color:
+                                      (showSearch ? Colors.orange : Colors.blue)
+                                          .withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(16),
+                                onTap: () {
+                                  toggleShowSearch();
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  child: AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 200),
+                                    child: Icon(
+                                      showSearch
+                                          ? Icons.close_rounded
+                                          : Icons.search_rounded,
+                                      key: ValueKey(showSearch),
+                                      color: Colors.white,
+                                      size: 24,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
+                          const SizedBox(width: 8),
                           DayNightSwitch(
                             duration: Duration(milliseconds: 800),
                             // Initiallyl listen to theme changes
@@ -88,8 +148,6 @@ class _ForecastScreenState extends State<ForecastScreen> {
                                   dark ? ThemeMode.dark : ThemeMode.light,
                                 ),
                           ),
-
-                          // get forcast for 4 days
                         ],
                       ),
                       if (forecastData.list != null &&
@@ -118,6 +176,174 @@ class _ForecastScreenState extends State<ForecastScreen> {
                         ),
 
                       const SizedBox(height: 20),
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        height: showSearch ? 80 : 0,
+                        child: showSearch
+                            ? Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(25),
+                                  child: BackdropFilter(
+                                    filter: ImageFilter.blur(
+                                      sigmaX: 10,
+                                      sigmaY: 10,
+                                    ),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(25),
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            Colors.white.withOpacity(0.25),
+                                            Colors.white.withOpacity(0.15),
+                                          ],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ),
+                                        border: Border.all(
+                                          color: Colors.white.withOpacity(0.4),
+                                          width: 1.5,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(
+                                              0.1,
+                                            ),
+                                            blurRadius: 20,
+                                            offset: const Offset(0, 8),
+                                          ),
+                                          BoxShadow(
+                                            color: Colors.white.withOpacity(
+                                              0.1,
+                                            ),
+                                            blurRadius: 10,
+                                            offset: const Offset(-5, -5),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: TextField(
+                                              controller: _searchController,
+                                              style: const TextStyle(
+                                                color: Colors.black87,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                              decoration: InputDecoration(
+                                                hintText:
+                                                    '🌍 Search for a city...',
+                                                hintStyle: TextStyle(
+                                                  color: isDarkMode
+                                                      ? Colors.white
+                                                      : Colors.black,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                                border: InputBorder.none,
+                                                contentPadding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 20,
+                                                      vertical: 15,
+                                                    ),
+                                                prefixIcon: Container(
+                                                  margin: const EdgeInsets.all(
+                                                    8,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.blue
+                                                        .withOpacity(0.1),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          12,
+                                                        ),
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.location_city_rounded,
+                                                    color: Colors.blue.shade600,
+                                                    size: 20,
+                                                  ),
+                                                ),
+                                              ),
+                                              onSubmitted: (value) {
+                                                if (value.trim().isNotEmpty) {
+                                                  context
+                                                      .read<ForecastCubit>()
+                                                      .getForecast4DaysForCity(
+                                                        value.trim(),
+                                                      );
+                                                }
+                                              },
+                                            ),
+                                          ),
+                                          Container(
+                                            margin: const EdgeInsets.only(
+                                              right: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                colors: [
+                                                  Colors.blue.shade400,
+                                                  Colors.blue.shade600,
+                                                ],
+                                                begin: Alignment.topLeft,
+                                                end: Alignment.bottomRight,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.blue
+                                                      .withOpacity(0.3),
+                                                  blurRadius: 8,
+                                                  offset: const Offset(0, 4),
+                                                ),
+                                              ],
+                                            ),
+                                            child: Material(
+                                              color: Colors.transparent,
+                                              child: InkWell(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                                onTap: () {
+                                                  HapticFeedback.mediumImpact();
+                                                  if (_searchController.text
+                                                      .trim()
+                                                      .isNotEmpty) {
+                                                    context
+                                                        .read<ForecastCubit>()
+                                                        .getForecast4DaysForCity(
+                                                          _searchController.text
+                                                              .trim(),
+                                                        );
+                                                  }
+                                                },
+                                                child: Container(
+                                                  padding: const EdgeInsets.all(
+                                                    12,
+                                                  ),
+                                                  child: const Icon(
+                                                    Icons.search_rounded,
+                                                    color: Colors.white,
+                                                    size: 24,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : const SizedBox.shrink(),
+                      ),
 
                       // Forecast list
                       Expanded(
@@ -142,62 +368,91 @@ class _ForecastScreenState extends State<ForecastScreen> {
               ),
             );
           } else if (state is ForecastError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Error loading forecast',
-                    style: TextStyle(fontSize: 30),
-                  ),
-                  const SizedBox(height: 8),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32),
-                    child: Text(
-                      state.message,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 18),
+            return Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.blue.shade300.withOpacity(0.3),
+                    Colors.blue.shade100.withOpacity(0.1),
+                  ],
+                ),
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.red,
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () => context.read<ForecastCubit>().getLongLat(),
-                    child: const Text('Retry'),
-                  ),
-                ],
+                    const SizedBox(height: 16),
+                    Text(
+                      'Error loading forecast',
+                      style: TextStyle(fontSize: 30),
+                    ),
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Text(
+                        state.message,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () =>
+                          context.read<ForecastCubit>().getLongLat(),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
               ),
             );
           } else {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.cloud_queue, size: 64, color: Colors.blue),
-                  const SizedBox(height: 16),
-                  Text('Weather Forecast', style: TextStyle(fontSize: 20)),
-                  const SizedBox(height: 8),
-                  const Text('Get your 5-day weather forecast'),
-                  const SizedBox(height: 24),
-                  InkWell(
-                    onTap: () => context.read<ForecastCubit>().getLongLat(),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.blue,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Text(
-                        'Load Forecast',
-                        style: TextStyle(color: Colors.white, fontSize: 16),
+            return Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.blue.shade300.withOpacity(0.3),
+                    Colors.blue.shade100.withOpacity(0.1),
+                  ],
+                ),
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.cloud_queue, size: 64, color: Colors.blue),
+                    const SizedBox(height: 16),
+                    Text('Weather Forecast', style: TextStyle(fontSize: 20)),
+                    const SizedBox(height: 8),
+                    const Text('Get your 5-day weather forecast'),
+                    const SizedBox(height: 24),
+                    InkWell(
+                      onTap: () => context.read<ForecastCubit>().getLongLat(),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          'Load Forecast',
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           }

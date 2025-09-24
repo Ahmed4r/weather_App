@@ -11,7 +11,7 @@ class AppTheme {
       ),
     ),
     primarySwatch: Colors.cyan,
-    scaffoldBackgroundColor: Colors.white,
+    scaffoldBackgroundColor: const Color.fromARGB(255, 229, 227, 227),
     appBarTheme: const AppBarTheme(
       actionsIconTheme: IconThemeData(color: Colors.black54),
       toolbarHeight: 100,

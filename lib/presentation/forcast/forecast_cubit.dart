@@ -66,4 +66,27 @@ class ForecastCubit extends Cubit<ForecastState> {
       emit(ForecastError('Forecast Error: $e'));
     }
   }
+
+  // Get forecast by city name
+  void getForecast4DaysForCity(String city) async {
+    emit(ForecastLoading());
+    try {
+      // Debug: Log API request details
+      log('Making forecast API request for city: $city');
+
+      final data = await apiService.searchCityForecast4Days(city);
+
+      // Debug: Log the received forecast data
+      log('Forecast data received for city $city: $data');
+
+      // Extract city name from ForecastModel
+      String cityName = data.city?.name ?? 'Unknown Location';
+      log('Extracted city name: $cityName');
+
+      emit(ForecastSuccess(cityName, data));
+    } catch (e) {
+      log('Forecast method error: $e');
+      emit(ForecastError('Forecast Error: $e'));
+    }
+  }
 }
