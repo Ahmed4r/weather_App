@@ -66,303 +66,325 @@ class _ForecastScreenState extends State<ForecastScreen> {
           } else if (state is ForecastSuccess) {
             final forecastData = state.forecast;
             return Scaffold(
-              body: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.blue.shade300.withOpacity(0.3),
-                      Colors.blue.shade100.withOpacity(0.1),
-                    ],
+              body: RefreshIndicator(
+                onRefresh: () async {
+                  context.read<ForecastCubit>().get4DayForecast();
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.blue.shade300.withOpacity(0.3),
+                        Colors.blue.shade100.withOpacity(0.1),
+                      ],
+                    ),
                   ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      // Header with current location info
-                      SizedBox(height: 60),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Container(
-                            margin: const EdgeInsets.only(right: 8),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: showSearch
-                                    ? [
-                                        Colors.orange.shade400,
-                                        Colors.orange.shade600,
-                                      ]
-                                    : [
-                                        Colors.blue.shade400,
-                                        Colors.blue.shade600,
-                                      ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color:
-                                      (showSearch ? Colors.orange : Colors.blue)
-                                          .withOpacity(0.3),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        // Header with current location info
+                        SizedBox(height: 60),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.only(right: 8),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: showSearch
+                                      ? [
+                                          Colors.orange.shade400,
+                                          Colors.orange.shade600,
+                                        ]
+                                      : [
+                                          Colors.blue.shade400,
+                                          Colors.blue.shade600,
+                                        ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
                                 ),
-                              ],
-                            ),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
                                 borderRadius: BorderRadius.circular(16),
-                                onTap: () {
-                                  toggleShowSearch();
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-                                  child: AnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 200),
-                                    child: Icon(
-                                      showSearch
-                                          ? Icons.close_rounded
-                                          : Icons.search_rounded,
-                                      key: ValueKey(showSearch),
-                                      color: Colors.white,
-                                      size: 24,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color:
+                                        (showSearch
+                                                ? Colors.orange
+                                                : Colors.blue)
+                                            .withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(16),
+                                  onTap: () {
+                                    toggleShowSearch();
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(12),
+                                    child: AnimatedSwitcher(
+                                      duration: const Duration(
+                                        milliseconds: 200,
+                                      ),
+                                      child: Icon(
+                                        showSearch
+                                            ? Icons.close_rounded
+                                            : Icons.search_rounded,
+                                        key: ValueKey(showSearch),
+                                        color: Colors.white,
+                                        size: 24,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          DayNightSwitch(
-                            duration: Duration(milliseconds: 800),
-                            // Initiallyl listen to theme changes
-                            initiallyDark: isDarkMode,
-                            size: 20,
-                            onChange: (dark) =>
-                                context.read<ThemeCubit>().toggleTheme(
-                                  dark ? ThemeMode.dark : ThemeMode.light,
-                                ),
-                          ),
-                        ],
-                      ),
-                      if (forecastData.list != null &&
-                          forecastData.list!.isNotEmpty)
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.location_on, color: Colors.blue),
-                              const SizedBox(width: 8),
-                              Text(
-                                forecastData.city?.name != null
-                                    ? forecastData.city!.name!
-                                    : 'Unknown Location',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
+                            const SizedBox(width: 8),
+                            DayNightSwitch(
+                              duration: Duration(milliseconds: 800),
+                              // Initiallyl listen to theme changes
+                              initiallyDark: isDarkMode,
+                              size: 20,
+                              onChange: (dark) =>
+                                  context.read<ThemeCubit>().toggleTheme(
+                                    dark ? ThemeMode.dark : ThemeMode.light,
+                                  ),
+                            ),
+                          ],
                         ),
-
-                      const SizedBox(height: 20),
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                        height: showSearch ? 80 : 0,
-                        child: showSearch
-                            ? Container(
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 20,
+                        if (forecastData.list != null &&
+                            forecastData.list!.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.location_on,
+                                  color: Colors.blue,
                                 ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(25),
-                                  child: BackdropFilter(
-                                    filter: ImageFilter.blur(
-                                      sigmaX: 10,
-                                      sigmaY: 10,
-                                    ),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(25),
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            Colors.white.withOpacity(0.25),
-                                            Colors.white.withOpacity(0.15),
-                                          ],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                        ),
-                                        border: Border.all(
-                                          color: Colors.white.withOpacity(0.4),
-                                          width: 1.5,
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withOpacity(
-                                              0.1,
-                                            ),
-                                            blurRadius: 20,
-                                            offset: const Offset(0, 8),
-                                          ),
-                                          BoxShadow(
-                                            color: Colors.white.withOpacity(
-                                              0.1,
-                                            ),
-                                            blurRadius: 10,
-                                            offset: const Offset(-5, -5),
-                                          ),
-                                        ],
+                                const SizedBox(width: 8),
+                                Text(
+                                  forecastData.city?.name != null
+                                      ? forecastData.city!.name!
+                                      : 'Unknown Location',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                        const SizedBox(height: 20),
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          height: showSearch ? 80 : 0,
+                          child: showSearch
+                              ? Container(
+                                  margin: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(25),
+                                    child: BackdropFilter(
+                                      filter: ImageFilter.blur(
+                                        sigmaX: 10,
+                                        sigmaY: 10,
                                       ),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: TextField(
-                                              controller: _searchController,
-                                              style: const TextStyle(
-                                                color: Colors.black87,
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w500,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            25,
+                                          ),
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              Colors.white.withOpacity(0.25),
+                                              Colors.white.withOpacity(0.15),
+                                            ],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.white.withOpacity(
+                                              0.4,
+                                            ),
+                                            width: 1.5,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withOpacity(
+                                                0.1,
                                               ),
-                                              decoration: InputDecoration(
-                                                hintText:
-                                                    '🌍 Search for a city...',
-                                                hintStyle: TextStyle(
+                                              blurRadius: 20,
+                                              offset: const Offset(0, 8),
+                                            ),
+                                            BoxShadow(
+                                              color: Colors.white.withOpacity(
+                                                0.1,
+                                              ),
+                                              blurRadius: 10,
+                                              offset: const Offset(-5, -5),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: TextField(
+                                                controller: _searchController,
+                                                style: TextStyle(
                                                   color: isDarkMode
                                                       ? Colors.white
                                                       : Colors.black,
                                                   fontSize: 16,
-                                                  fontWeight: FontWeight.w400,
+                                                  fontWeight: FontWeight.w500,
                                                 ),
-                                                border: InputBorder.none,
-                                                contentPadding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 20,
-                                                      vertical: 15,
+                                                decoration: InputDecoration(
+                                                  hintText:
+                                                      '🌍 Search for a city...',
+                                                  hintStyle: TextStyle(
+                                                    color: isDarkMode
+                                                        ? Colors.white
+                                                        : Colors.black,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w400,
+                                                  ),
+
+                                                  border: InputBorder.none,
+                                                  contentPadding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 20,
+                                                        vertical: 15,
+                                                      ),
+                                                  prefixIcon: Container(
+                                                    margin:
+                                                        const EdgeInsets.all(8),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.blue
+                                                          .withOpacity(0.1),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            12,
+                                                          ),
                                                     ),
-                                                prefixIcon: Container(
-                                                  margin: const EdgeInsets.all(
-                                                    8,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.blue
-                                                        .withOpacity(0.1),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          12,
-                                                        ),
-                                                  ),
-                                                  child: Icon(
-                                                    Icons.location_city_rounded,
-                                                    color: Colors.blue.shade600,
-                                                    size: 20,
+                                                    child: Icon(
+                                                      Icons
+                                                          .location_city_rounded,
+                                                      color:
+                                                          Colors.blue.shade600,
+                                                      size: 20,
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                              onSubmitted: (value) {
-                                                if (value.trim().isNotEmpty) {
-                                                  context
-                                                      .read<ForecastCubit>()
-                                                      .getForecast4DaysForCity(
-                                                        value.trim(),
-                                                      );
-                                                }
-                                              },
-                                            ),
-                                          ),
-                                          Container(
-                                            margin: const EdgeInsets.only(
-                                              right: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              gradient: LinearGradient(
-                                                colors: [
-                                                  Colors.blue.shade400,
-                                                  Colors.blue.shade600,
-                                                ],
-                                                begin: Alignment.topLeft,
-                                                end: Alignment.bottomRight,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.blue
-                                                      .withOpacity(0.3),
-                                                  blurRadius: 8,
-                                                  offset: const Offset(0, 4),
-                                                ),
-                                              ],
-                                            ),
-                                            child: Material(
-                                              color: Colors.transparent,
-                                              child: InkWell(
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
-                                                onTap: () {
-                                                  HapticFeedback.mediumImpact();
-                                                  if (_searchController.text
-                                                      .trim()
-                                                      .isNotEmpty) {
+                                                onSubmitted: (value) {
+                                                  if (value.trim().isNotEmpty) {
                                                     context
                                                         .read<ForecastCubit>()
                                                         .getForecast4DaysForCity(
-                                                          _searchController.text
-                                                              .trim(),
+                                                          value.trim(),
                                                         );
                                                   }
                                                 },
-                                                child: Container(
-                                                  padding: const EdgeInsets.all(
-                                                    12,
+                                              ),
+                                            ),
+                                            Container(
+                                              margin: const EdgeInsets.only(
+                                                right: 4,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  colors: [
+                                                    Colors.blue.shade400,
+                                                    Colors.blue.shade600,
+                                                  ],
+                                                  begin: Alignment.topLeft,
+                                                  end: Alignment.bottomRight,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.blue
+                                                        .withOpacity(0.3),
+                                                    blurRadius: 8,
+                                                    offset: const Offset(0, 4),
                                                   ),
-                                                  child: const Icon(
-                                                    Icons.search_rounded,
-                                                    color: Colors.white,
-                                                    size: 24,
+                                                ],
+                                              ),
+                                              child: Material(
+                                                color: Colors.transparent,
+                                                child: InkWell(
+                                                  borderRadius:
+                                                      BorderRadius.circular(20),
+                                                  onTap: () {
+                                                    HapticFeedback.mediumImpact();
+                                                    if (_searchController.text
+                                                        .trim()
+                                                        .isNotEmpty) {
+                                                      context
+                                                          .read<ForecastCubit>()
+                                                          .getForecast4DaysForCity(
+                                                            _searchController
+                                                                .text
+                                                                .trim(),
+                                                          );
+                                                    }
+                                                  },
+                                                  child: Container(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                          12,
+                                                        ),
+                                                    child: const Icon(
+                                                      Icons.search_rounded,
+                                                      color: Colors.white,
+                                                      size: 24,
+                                                    ),
                                                   ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              )
-                            : const SizedBox.shrink(),
-                      ),
-
-                      // Forecast list
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: _getDailyForecasts(
-                            forecastData.list!,
-                          ).length,
-                          itemBuilder: (context, index) {
-                            final dayData = _getDailyForecasts(
-                              forecastData.list!,
-                            )[index];
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 12.0),
-                              child: _buildForecastCard(dayData),
-                            );
-                          },
+                                )
+                              : const SizedBox.shrink(),
                         ),
-                      ),
-                    ],
+
+                        // Forecast list
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: _getDailyForecasts(
+                              forecastData.list!,
+                            ).length,
+                            itemBuilder: (context, index) {
+                              final dayData = _getDailyForecasts(
+                                forecastData.list!,
+                              )[index];
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12.0),
+                                child: _buildForecastCard(dayData),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

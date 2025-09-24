@@ -21,11 +21,16 @@ Built to practice and learn:
 - Pull-to-refresh and error handling
 
 ## screenshots
+
 <table>
     <tr>
         <td><img src="screenshots/dark.jpeg" alt="Light Mode" width="300"/></td>
         <td><img src="screenshots/light.jpeg" alt="Dark Mode" width="300"/></td>
         <td><img src="screenshots/search.png" alt="Dark Mode" width="300"/></td>
+        <td><img src="screenshots/4daySearch.png" alt="Dark Mode" width="300"/></td>
+        <td><img src="screenshots/4dayCitySearch.png" alt="Dark Mode" width="300"/></td>
+        <td><img src="screenshots/error.png" alt="Dark Mode" width="300"/></td>
+        
     </tr>
 </table>
 
@@ -37,7 +42,6 @@ Built to practice and learn:
 - **Geolocator** - Location services
 - **SharedPreferences** - Local storage
 - **Lottie** - Animations
-
 
 ## 📚 Skills Demonstrated
 
