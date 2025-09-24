@@ -8,7 +8,7 @@ import 'package:weather_app/model/forecast_model.dart';
 import 'package:weather_app/presentation/forcast/forcaset_state.dart';
 import 'package:weather_app/presentation/forcast/forecast_cubit.dart';
 
-import 'package:weather_app/presentation/settings/theme_cubit.dart';
+import 'package:weather_app/shared/theme/theme_cubit.dart';
 
 class ForecastScreen extends StatefulWidget {
   static const String routeName = '/forecast';

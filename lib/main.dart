@@ -6,19 +6,13 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:weather_app/presentation/forcast/forcast_screen.dart';
 import 'package:weather_app/presentation/forcast/forecast_cubit.dart';
 import 'package:weather_app/shared/theme/app_theme.dart';
-import 'package:weather_app/presentation/settings/theme_cubit.dart';
+import 'package:weather_app/shared/theme/theme_cubit.dart';
 import 'package:weather_app/presentation/weather/weather_cubit.dart';
 import 'package:weather_app/presentation/weather/weather_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Load environment variables
   await dotenv.load(fileName: ".env");
-
-  FlutterError.onError = (FlutterErrorDetails details) {
-    ErrorHandler.handleFlutterError(details);
-  };
   runApp(WeatherApp());
 }
 
@@ -58,14 +52,5 @@ class WeatherApp extends StatelessWidget {
         },
       ),
     );
-  }
-}
-
-class ErrorHandler {
-  static void handleFlutterError(FlutterErrorDetails details) {
-    if (kDebugMode) {
-      log('Flutter Error: ${details.exception}');
-      log('Stack trace: ${details.stack}');
-    }
   }
 }

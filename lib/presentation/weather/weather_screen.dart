@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import 'package:weather_app/presentation/forcast/forcast_screen.dart';
-import 'package:weather_app/presentation/settings/theme_cubit.dart';
+import 'package:weather_app/shared/theme/theme_cubit.dart';
 import 'package:weather_app/presentation/weather/weather_cubit.dart';
 
 class WeatherScreen extends StatefulWidget {
