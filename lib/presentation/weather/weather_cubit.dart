@@ -1,16 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:weather_app/core/constants.dart';
-import 'package:weather_app/core/geo_locator_service.dart';
-import 'package:weather_app/features/data/model/weather_model.dart';
-
+import 'package:weather_app/model/weather_model.dart';
+import 'package:weather_app/shared/api_service.dart';
+import 'package:weather_app/shared/geo_locator_service.dart';
 part 'weather_state.dart';
 
 class WeatherCubit extends Cubit<WeatherState> {
@@ -18,6 +15,7 @@ class WeatherCubit extends Cubit<WeatherState> {
   Weather model = Weather();
   double long = 0.0;
   double lat = 0.0;
+  ApiService apiService = ApiService();
   // Get current location
   void getLongLat() async {
     emit(WeatherLoading());
@@ -30,45 +28,38 @@ class WeatherCubit extends Cubit<WeatherState> {
       emit(WeatherError(e.toString()));
     }
   }
+
   // Get weather by city name
   Future<void> searchCityWeather(String city) async {
     emit(WeatherLoading());
     try {
-      final url = Uri.parse(
-        '${Constants.baseUrl}?q=$city&appid=${Constants.apiKey}&units=metric',
+      Weather weather = await apiService.searchCityWeather(city);
+      final formattedTime = formatLocalTime(
+        weather.dt ?? 0,
+        weather.timezone ?? 0,
       );
-      final response = await http.get(url).timeout(const Duration(seconds: 5));
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        model = Weather.fromJson(data);
-        log('Success : ${response.body}');
-        final formattedTime = formatLocalTime(
-          model.dt ?? 0,
-          model.timezone ?? 0,
-        );
-        emit(WeatherSuccess(model, formattedTime));
-      } else {
-        emit(WeatherError('Server error: ${response.statusCode}'));
-      }
+      emit(WeatherSuccess(weather, formattedTime));
     } catch (e) {
       emit(WeatherError(getExceptionMessage(e)));
     }
   }
+
   // Get weather by current location
   Future<void> getWeather() async {
     emit(WeatherLoading());
     try {
-      // https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API key}
-      final url = Uri.parse(
-        '${Constants.baseUrl}?lat=$lat&lon=$long&appid=${Constants.apiKey}&units=metric',
+      Weather weather = await apiService.getCurrentLocationWeather(lat, long);
+      final formattedTime = formatLocalTime(
+        weather.dt ?? 0,
+        weather.timezone ?? 0,
       );
-      await _fetchWeatherData(url);
+      emit(WeatherSuccess(weather, formattedTime));
     } catch (e) {
       log(e.toString());
       emit(WeatherError(getExceptionMessage(e)));
     }
   }
+
   // Convert timestamp to local time
   String formatLocalTime(int timestamp, int offset) {
     final utc = DateTime.fromMillisecondsSinceEpoch(
@@ -78,22 +69,7 @@ class WeatherCubit extends Cubit<WeatherState> {
     final local = utc.add(Duration(seconds: offset));
     return DateFormat('hh:mm a').format(local);
   }
-  // fetch weather data from API
-  Future<void> _fetchWeatherData(Uri url) async {
-    final response = await http.get(url).timeout(const Duration(seconds: 10));
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      model = Weather.fromJson(data);
-
-      log('Weather data fetched successfully');
-
-      final formattedTime = formatLocalTime(model.dt ?? 0, model.timezone ?? 0);
-      emit(WeatherSuccess(model, formattedTime));
-    } else {
-      throw HttpException('Server error: ${response.statusCode}');
-    }
-  }
   // Handle different types of exceptions
   String getExceptionMessage(dynamic e) {
     if (e is SocketException) {
@@ -108,6 +84,7 @@ class WeatherCubit extends Cubit<WeatherState> {
       return 'Unexpected error occurred';
     }
   }
+
   // Get weather image based on weather status
   String getWeatherImage(String? weatherStatus) {
     if (weatherStatus == null) return 'assets/sunny.json';

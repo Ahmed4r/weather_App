@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
+  // light theme
   ThemeData lightTheme = ThemeData(
     iconTheme: IconThemeData(color: Colors.grey, size: 20),
     elevatedButtonTheme: ElevatedButtonThemeData(
@@ -29,6 +30,7 @@ class AppTheme {
       bodyMedium: TextStyle(color: Colors.black54, fontSize: 16),
     ),
   );
+  // dark theme
   ThemeData darkTheme = ThemeData(
     iconTheme: IconThemeData(color: Colors.grey, size: 20),
     elevatedButtonTheme: ElevatedButtonThemeData(

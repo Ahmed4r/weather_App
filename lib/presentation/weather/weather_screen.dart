@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
-import 'package:weather_app/features/presentation/settings/theme_cubit.dart';
-import 'package:weather_app/features/presentation/weather/weather_cubit.dart';
+import 'package:weather_app/presentation/settings/theme_cubit.dart';
+import 'package:weather_app/presentation/weather/weather_cubit.dart';
 
 class WeatherScreen extends StatefulWidget {
   static const routeName = '/weather';
@@ -73,19 +73,29 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
         centerTitle: true,
         actions: [
+          // theme switch
           DayNightSwitch(
-            // duration: Duration(milliseconds: 800),
-            // initiallyDark: true,
+            duration: Duration(milliseconds: 800),
+            // Initiallyl listen to theme changes
+            initiallyDark: isDarkMode,
             size: 20,
             onChange: (dark) => context.read<ThemeCubit>().toggleTheme(
               dark ? ThemeMode.dark : ThemeMode.light,
             ),
           ),
+          // search button
           IconButton(
             onPressed: () {
               toggleShowSearch();
             },
             icon: Icon(Icons.search),
+          ),
+          // get forcast for 4 days
+          IconButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/forecast');
+            },
+            icon: Icon(Icons.calendar_today),
           ),
         ],
       ),
