@@ -48,7 +48,7 @@ class ForecastCubit extends Cubit<ForecastState> {
       // Debug: Log API request details
       log('Making forecast API request with lat=$lat, lon=$long');
 
-      final data = await apiService.get4DayForecast(
+      final data = await apiService.get5DayForecast(
         lat,
         long,
       ); // Fixed: lat first, then long
@@ -74,7 +74,7 @@ class ForecastCubit extends Cubit<ForecastState> {
       // Debug: Log API request details
       log('Making forecast API request for city: $city');
 
-      final data = await apiService.searchCityForecast4Days(city);
+      final data = await apiService.searchCityForecast5Days(city);
 
       // Debug: Log the received forecast data
       log('Forecast data received for city $city: $data');

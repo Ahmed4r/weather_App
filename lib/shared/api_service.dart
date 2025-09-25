@@ -53,8 +53,8 @@ class ApiService {
     }
   }
 
-  // get 4 day forecast
-  Future<forecast_model.ForecastModel> get4DayForecast(
+  // get 5 days forecast
+  Future<forecast_model.ForecastModel> get5DayForecast(
     double lat,
     double long,
   ) async {
@@ -94,7 +94,7 @@ class ApiService {
   }
 
   // get forecast by city name
-  Future<forecast_model.ForecastModel> searchCityForecast4Days(
+  Future<forecast_model.ForecastModel> searchCityForecast5Days(
     String city,
   ) async {
     try {
